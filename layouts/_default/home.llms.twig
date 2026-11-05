@@ -1,0 +1,52 @@
+{%- import _self as llms -%}
+# {{ site.title }}
+
+{# description of the site #}
+> {{ site.description }}
+{# main menu links (except home page and external URLs) #}
+{%- set menu = site.menus.main|default([])|filter(i => i.id != site.home and i is not external)|sort_by_weight -%}
+{%- if menu|length > 0 %}
+
+{% for item in menu -%}
+{%- set page = site.page(item.id) -%}
+- {{ page ? llms.link(page) : '[' ~ item.name ~ '](' ~ url(item.url, {canonical: true}) ~ ')' }}
+{% endfor -%}
+{%- endif %}
+{# top level sections of the site: sub-sections are handled recursively by the `list` macro #}
+{% for section in site.pages|filter(p => p.type == 'section' and (p.toplevel ?? false) and p.published == true and (p.excluded ?? false) != true and (p.exclude ?? false) != true and (p.llms ?? true) != false)|sort_by_weight %}
+{%- set list = llms.list(section)|trim -%}
+{# only show the section if it has pages (or sub-sections with pages) #}
+{%- if list is not empty ~%}
+## {{ section.title }}
+
+{{ list }}
+{% endif %}
+{%- endfor %}
+{#
+ # Lists the pages directly attached to a section, then recursively its sub-sections:
+ # a sub-section is rendered as a link to its index page, followed by an indented list of its own pages.
+ # Note: a page belongs to its top level section *and* to each of its ancestor sub-sections,
+ # so pages are filtered on their `parent` (ie. their deepest section) to avoid duplicated entries.
+ #}
+{%- macro list(section, indent = '') -%}
+{%- import _self as llms -%}
+{# pages directly attached to the section #}
+{%- set pages = section.pages|default([])|filter(p => (p.llms ?? true) != false and (p.parent.id ?? null) == section.id)|sort_by_weight -%}
+{%- for page in pages -%}
+{{ indent }}- {{ llms.link(page) }}
+{% endfor -%}
+{# sub-sections of the section #}
+{%- set subsections = section.sections|default([])|filter(s => s.published == true and (s.excluded ?? false) != true and (s.exclude ?? false) != true and (s.llms ?? true) != false)|sort_by_weight -%}
+{%- for subsection in subsections -%}
+{{ indent }}- {{ llms.link(subsection) }}
+{{ llms.list(subsection, indent ~ '  ') -}}
+{% endfor -%}
+{%- endmacro -%}
+{#
+ # Renders a page as a Markdown link, pointing to its Markdown version if available.
+ #}
+{%- macro link(page) -%}
+{%- set format = 'markdown' in page.output|default([]) ? 'markdown' : 'html' -%}
+[{{ page.title }}]({{ url(page, {format: format, canonical: true}) }})
+{%- if page.description|default %}: {{ page.description|trim }}{% endif -%}
+{%- endmacro -%}

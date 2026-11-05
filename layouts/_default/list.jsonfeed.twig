@@ -1,0 +1,86 @@
+{% extends 'extended/feed.twig' %}
+
+{% block feed %}
+{
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": {{ title|json_encode(constant('JSON_UNESCAPED_UNICODE')) }},
+  "home_page_url": "{{ url(page, {canonical: true}) }}",
+  "feed_url": "{{ url(page, {canonical: true, format: 'jsonfeed'}) }}",
+  "description": {{ page.description|default(site.description)|json_encode(constant('JSON_UNESCAPED_UNICODE')) }},
+  {%- set icon = asset(site.metatags.favicon.image|default('favicon.png'), {ignore_missing: true}) -%}
+  {%- if not icon.missing ~%}
+  "icon": "{{ icon|resize(512)|url({canonical: true}) }}",
+  "favicon": "{{ icon|resize(64)|url({canonical: true}) }}",
+  {%- endif -%}
+  {%- set author = site.author|default -%}
+  {%- if author is not iterable -%}
+    {%- set author = {name: site.author|default} -%}
+  {%- endif -%}
+  {%- if author.name|default ~%}
+  "authors": [
+    {
+      "name": {{ author.name|json_encode }}
+      {%- if author.url|default -%}
+      ,
+      "url": "{{ author.url }}"
+      {%- endif ~%}
+      {%- if author.avatar|default -%}
+      ,
+      "avatar": "{{ url(author.avatar|resize(512), {canonical: true}) }}"
+      {%- endif ~%}
+    }
+  ],
+  {%- endif ~%}
+  "language": "{{ lang }}",
+  "items": [
+    {%- for item in items ~%}
+    {
+      {%- block item ~%}
+      "id": {{ url(item, {canonical: true})|json_encode(constant('JSON_UNESCAPED_SLASHES')) }},
+      "url": "{{ url(item, {canonical: true}) }}",
+      "title": {{ item.title|json_encode(constant('JSON_UNESCAPED_UNICODE')) }},
+      {%- if item.description|default ~%}
+      "summary": {{ item.description|json_encode(constant('JSON_UNESCAPED_UNICODE')) }},
+      {%- endif ~%}
+      {%- if item.image|default ~%}
+      "image": "{{ url(asset(item.image), {canonical: true}) }}",
+      {%- endif ~%}
+      "date_published": "{{ item.date|date('c') }}",
+      {%- if item.updated|default ~%}
+      "date_modified": "{{ item.updated|date('c') }}",
+      {%- endif -%}
+      "content_text": {{ item.content|striptags|json_encode(constant('JSON_UNESCAPED_UNICODE')) }},
+      "content_html": {{ item.content|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }},
+      {%- set author = item.author|default -%}
+      {%- if author is not iterable -%}
+        {%- set author = {name: item.author|default} -%}
+      {%- endif -%}
+      {%- if author.name|default ~%}
+      "authors": [
+        {
+          "name": {{ author.name|json_encode }}
+          {%- if author.url|default -%}
+          ,
+          "url": "{{ author.url }}"
+          {%- endif ~%}
+          {%- if author.avatar|default -%}
+          ,
+          "avatar": "{{ url(author.avatar|resize(512), {canonical: true}) }}"
+          {%- endif ~%}
+        }
+      ],
+      {%- endif -%}
+      {%- if item.tags|default ~%}
+      "tags": {{ item.tags|default([])|json_encode }},
+      {%- endif ~%}
+      {%- for variable, value in item.fmVariables|filter((v, k) => k starts with '_') ~%}
+      "{{ variable }}": {{ value|json_encode(constant('JSON_UNESCAPED_SLASHES')) }},
+      {%- endfor ~%}
+      "language": "{{ item.language|default(lang) }}"
+      {%- endblock ~%}
+    }
+    {%- if not loop.last %},{% endif -%}
+    {%- endfor ~%}
+  ]
+}
+{% endblock feed %}

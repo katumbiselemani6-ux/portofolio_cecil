@@ -1,0 +1,7 @@
+# Cecil
+_site/
+.cache/
+.cecil/
+
+# Fichier exécutable local
+cecil.phar

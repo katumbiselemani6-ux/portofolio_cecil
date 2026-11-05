@@ -1,0 +1,14 @@
+{#- params: menu, page (optional, to highlight the current entry) ~#}
+      {%- if menu|length > 1 ~%}
+      {%- set current_url = page|default ? url(page) : null ~%}
+      <nav class="main-nav" aria-label="Navigation principale">
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-menu">Menu</button>
+        <ul id="main-menu" class="nav-list">
+        {%- for item in site.menus[menu]|sort_by_weight ~%}
+          {%- set item_url = url(item.url) ~%}
+          {%- set current = current_url and item_url == current_url ? 'page' : (page.section|default and item.id == page.section ? 'true' : null) ~%}
+          <li><a href="{{ item_url }}" data-weight="{{ item.weight }}"{% if current %} aria-current="{{ current }}"{% endif %}>{{ item.name }}</a></li>
+        {%- endfor ~%}
+        </ul>
+      </nav>
+      {%- endif ~%}

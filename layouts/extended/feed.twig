@@ -1,0 +1,11 @@
+{% set items = site.pages.showable(['unpublished'])|sort_by_date -%}
+{% if page.pages %}
+  {%- set items = page.pages.showable(['unpublished'])|sort_by_date %}
+{% endif -%}
+
+{% set title = site.title ~ ' - ' ~ page.title %}
+{% if page.type == 'homepage' %}{% set title = site.title %}{% endif %}
+{% set lang = site.language|default('en') %}
+{% set updated = site.time -%}
+
+{% block feed %}{% endblock %}
