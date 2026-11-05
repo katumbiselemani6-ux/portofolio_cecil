@@ -49,7 +49,7 @@ title: "Accueil"
 
   <div class="hero-image">
     <div class="image-glow"></div>
-    <img src="/images/profil.png" alt="Portrait de Katumbi Louison">
+    <img src="images/profil.png" alt="Portrait de Katumbi Louison">
   </div>
 
 </section>

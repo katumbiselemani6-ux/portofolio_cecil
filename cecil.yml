@@ -2,7 +2,7 @@
 # Configuration du portfolio
 title: "Katumbi Louison"
 baseline: "Étudiant en informatique | Développeur en formation"
-baseurl: "http://localhost:8000/"
+baseurl: "https://katumbiselemani6-ux.github.io/portfolio-cecil/"
 description: "Portfolio de Katumbi Louison. Découvrez mon parcours, mes compétences et mes projets informatiques."
 
 language: fr
